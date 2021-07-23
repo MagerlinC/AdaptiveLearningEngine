@@ -2,6 +2,7 @@ import { ProblemSolutionDTO } from '../problem/problem_solutionDTO';
 import { EloResult } from './elo_result';
 import { Problem } from '../problem/problem';
 import { Student } from '../student/student';
+import { dbRef } from 'src/firebase';
 
 export const isCorrectAnswer = (
   problem: Problem,
@@ -43,8 +44,44 @@ export const getEloChangeResult = (
   return new EloResult(playerAChange, playerBChange);
 };
 
-export const updateElos = (
+export const updateElos = async (
   problem: Problem,
   student: Student,
   eloResult: EloResult,
+): Promise<Student> => {
+  const problemId = problem.id;
+  const studentId = student.id;
+
+  // Update Problem ELO
+  const problemChangeVal = eloResult.playerBChange;
+  udpateProblemElo(problemId, problemChangeVal);
+  // Update Student ELO
+  const studentChangeVal = eloResult.playerAChange;
+  return updateStudentElo(studentId, studentChangeVal).then((res) => res);
+};
+
+const updateStudentElo = async (
+  studentId: string,
+  eloDifferenceToApply: number,
+): Promise<Student> => {
+  const studentData: Student | any = await dbRef
+    .collection('students')
+    .doc(studentId)
+    .get()
+    .then((snapshot) => snapshot.data());
+  studentData.id = studentId;
+  const curElo =
+    studentData.activeRating >= 0
+      ? studentData.activeRating
+      : studentData.initialRating;
+  const newElo = curElo + eloDifferenceToApply;
+  studentData.activeRating = newElo;
+
+  dbRef.collection('students').doc(studentId).set(studentData);
+  return studentData;
+};
+
+const udpateProblemElo = (
+  problemId: string,
+  eloDifferenceToApply: number,
 ): void => {};

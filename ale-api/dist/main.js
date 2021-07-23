@@ -303,17 +303,19 @@ let ProblemService = class ProblemService {
             .then((snapshot) => {
             const problems = [];
             snapshot.forEach((doc) => {
-                problems.push(doc.data());
+                const objToPush = doc.data();
+                objToPush.id = doc.id;
+                problems.push(objToPush);
             });
             return problems;
         });
         return problems;
     }
-    postProblemSolution(problemSolution) {
+    async postProblemSolution(problemSolution) {
         const eloResult = elo_service_1.getEloChangeResult(problemSolution);
-        elo_service_1.updateElos(problemSolution.problem, problemSolution.student, eloResult);
+        const updatedStudent = await elo_service_1.updateElos(problemSolution.problem, problemSolution.student, eloResult).then((res) => res);
         const problemSuccess = elo_service_1.isCorrectAnswer(problemSolution.problem, problemSolution.selectedAnswer);
-        return new problem_solution_response_1.ProblemSolutionResponse(problemSuccess, eloResult);
+        return new problem_solution_response_1.ProblemSolutionResponse(problemSuccess, updatedStudent, eloResult);
     }
 };
 ProblemService = __decorate([
@@ -331,6 +333,7 @@ exports.ProblemService = ProblemService;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.updateElos = exports.getEloChangeResult = exports.isCorrectAnswer = void 0;
 const elo_result_1 = __webpack_require__(10);
+const firebase_1 = __webpack_require__(11);
 const isCorrectAnswer = (problem, selectedAnswer) => {
     return problem.problemAnswer.toLowerCase() === selectedAnswer.toLowerCase();
 };
@@ -358,8 +361,31 @@ const getEloChangeResult = (submittedSolution) => {
     return new elo_result_1.EloResult(playerAChange, playerBChange);
 };
 exports.getEloChangeResult = getEloChangeResult;
-const updateElos = (problem, student, eloResult) => { };
+const updateElos = async (problem, student, eloResult) => {
+    const problemId = problem.id;
+    const studentId = student.id;
+    const problemChangeVal = eloResult.playerBChange;
+    udpateProblemElo(problemId, problemChangeVal);
+    const studentChangeVal = eloResult.playerAChange;
+    return updateStudentElo(studentId, studentChangeVal).then((res) => res);
+};
 exports.updateElos = updateElos;
+const updateStudentElo = async (studentId, eloDifferenceToApply) => {
+    const studentData = await firebase_1.dbRef
+        .collection('students')
+        .doc(studentId)
+        .get()
+        .then((snapshot) => snapshot.data());
+    studentData.id = studentId;
+    const curElo = studentData.activeRating >= 0
+        ? studentData.activeRating
+        : studentData.initialRating;
+    const newElo = curElo + eloDifferenceToApply;
+    studentData.activeRating = newElo;
+    firebase_1.dbRef.collection('students').doc(studentId).set(studentData);
+    return studentData;
+};
+const udpateProblemElo = (problemId, eloDifferenceToApply) => { };
 
 
 /***/ }),
@@ -424,9 +450,10 @@ module.exports = require("firebase/firestore");
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProblemSolutionResponse = void 0;
 class ProblemSolutionResponse {
-    constructor(success, eloResult) {
+    constructor(success, newStudentInfo, eloChangeResult) {
         this.problemSuccess = success;
-        this.eloChangeResult = eloResult;
+        this.newStudentInfo = newStudentInfo;
+        this.eloChangeResult = eloChangeResult;
     }
 }
 exports.ProblemSolutionResponse = ProblemSolutionResponse;
@@ -527,7 +554,9 @@ let StudentService = class StudentService {
             .then((snapshot) => {
             const students = [];
             snapshot.forEach((doc) => {
-                students.push(doc.data());
+                const objToPush = doc.data();
+                objToPush.id = doc.id;
+                students.push(objToPush);
             });
             return students;
         });
@@ -602,7 +631,7 @@ exports.StudentService = StudentService;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("0aba55b95882aebeb085")
+/******/ 		__webpack_require__.h = () => ("6c75f8524993f241e883")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

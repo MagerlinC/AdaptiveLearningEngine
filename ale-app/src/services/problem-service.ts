@@ -15,9 +15,11 @@ export const postSolution = (
   student: Student,
   answer: string,
   onResultFunc: (res: ProblemSolutionResponse) => void
-) => {
+): Promise<Student> => {
   const body = new ProblemSolutionDTO(student, problem, answer);
-  postRequest<ProblemSolutionResponse>(endpoint, body).then((res) =>
-    onResultFunc(res)
-  );
+  return postRequest<ProblemSolutionResponse>(endpoint, body).then((res) => {
+    onResultFunc(res);
+    const newStudent = res.newStudentInfo;
+    return newStudent;
+  });
 };

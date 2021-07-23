@@ -11,7 +11,9 @@ export class StudentService {
       .then((snapshot) => {
         const students = [];
         snapshot.forEach((doc) => {
-          students.push(doc.data());
+          const objToPush = doc.data();
+          objToPush.id = doc.id;
+          students.push(objToPush);
         });
         return students;
       });

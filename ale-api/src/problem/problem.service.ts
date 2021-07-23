@@ -9,6 +9,7 @@ import { dbRef } from '../firebase';
 import { EloResult } from '../problem-solution/elo_result';
 import { Problem } from './problem';
 import { ProblemSolutionResponse } from '../problem-solution/problem_solution_response';
+import { Student } from 'src/student/student';
 
 @Injectable()
 export class ProblemService {
@@ -19,23 +20,33 @@ export class ProblemService {
       .then((snapshot) => {
         const problems = [];
         snapshot.forEach((doc) => {
-          problems.push(doc.data());
+          const objToPush = doc.data();
+          objToPush.id = doc.id;
+          problems.push(objToPush);
         });
         return problems;
       });
     return problems;
   }
 
-  postProblemSolution(
+  async postProblemSolution(
     problemSolution: ProblemSolutionDTO,
-  ): ProblemSolutionResponse {
+  ): Promise<ProblemSolutionResponse> {
     const eloResult: EloResult = getEloChangeResult(problemSolution);
     // Send new ratings to DB
-    updateElos(problemSolution.problem, problemSolution.student, eloResult);
+    const updatedStudent: Student = await updateElos(
+      problemSolution.problem,
+      problemSolution.student,
+      eloResult,
+    ).then((res) => res);
     const problemSuccess = isCorrectAnswer(
       problemSolution.problem,
       problemSolution.selectedAnswer,
     );
-    return new ProblemSolutionResponse(problemSuccess, eloResult);
+    return new ProblemSolutionResponse(
+      problemSuccess,
+      updatedStudent,
+      eloResult,
+    );
   }
 }

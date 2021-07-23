@@ -10,11 +10,13 @@ import FailureIcon from "../../assets/close.svg";
 type ProblemItemProps = {
   problem: Problem;
   student: Student;
+  onProblemSubmitted: (newStudent: Student) => void;
 };
 
 export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
   problem,
   student,
+  onProblemSubmitted,
 }) => {
   const [problemInput, setProblemInput] = useState<string>("");
   const [hasCompleted, setHasCompleted] = useState<boolean>(false);
@@ -22,13 +24,19 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
   const [problemCompletionStatus, setProblemCompletionStatus] =
     useState<boolean>(false);
 
-  const submitAnswer = (): void => {
+  const submitAnswer = async (): Promise<void> => {
     const onResultFunc = (res: ProblemSolutionResponse) => {
       setRatingChange(res.eloChangeResult.playerAChange);
       setProblemCompletionStatus(res.problemSuccess);
       setHasCompleted(true);
     };
-    postSolution(problem, student, problemInput, onResultFunc);
+    const newStudent: Student = await postSolution(
+      problem,
+      student,
+      problemInput,
+      onResultFunc
+    ).then((res) => res);
+    onProblemSubmitted(newStudent);
   };
 
   const getProblemInteractionElement = (problem: Problem) => {
@@ -57,7 +65,7 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
           </div>
         )}
         <div className={"rating-change" + (success ? " green" : " red")}>
-          {success ? "+ " + ratingChange : ratingChange}
+          {success ? "+ " + Math.round(ratingChange) : Math.round(ratingChange)}
         </div>
       </div>
     );
@@ -66,7 +74,7 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
   return (
     <div className="problem-item">
       <div className="problem-header">
-        <div className="problem-title"> Exercise {problem.id}</div>
+        <div className="problem-title">{problem.subject}</div>
         <div className="problem-rating">
           (
           {problem.activeRating >= 0

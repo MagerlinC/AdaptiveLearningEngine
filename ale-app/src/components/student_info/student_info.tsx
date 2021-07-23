@@ -21,7 +21,7 @@ export const StudentInfo: FunctionComponent<StudentInfoProps> = ({
         <div className="rating-desc-text"> Your Rating is:</div>
         <div className="rating-value-text">
           {student.activeRating > 0
-            ? student.activeRating
+            ? Math.round(student.activeRating)
             : student.initialRating}
         </div>
       </div>

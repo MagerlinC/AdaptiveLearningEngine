@@ -17,17 +17,41 @@ function App() {
   );
 
   useEffect(() => {
+    setLoading(true);
     getProblems((problemList) => setProblems(problemList));
+    fetchStudents(() => setLoading(false));
+  }, []);
+
+  const fetchStudents = (onSuccess?: () => void) => {
     getStudents((studentList) => {
       setStudents(studentList);
-      setSelectedStudent(studentList[0]);
-      setLoading(false);
+      if (!selectedStudent) {
+        setSelectedStudent(studentList[0]);
+      } else {
+        setSelectedStudent(
+          studentList.find((student) => student.id === selectedStudent.id)
+        );
+      }
+      if (onSuccess) {
+        onSuccess();
+      }
     });
-  }, []);
+  };
+
+  const onNewStudentRating = (updatedStudent: Student) => {
+    const studentId = updatedStudent.id;
+    const curStudentIndex = students.findIndex(
+      (student) => student.id === studentId
+    );
+    const newStudents = [...students];
+    newStudents[curStudentIndex] = updatedStudent;
+    setStudents(newStudents);
+    setSelectedStudent(updatedStudent);
+  };
 
   return (
     <div className="App">
-      <header className="App-header">ALeEn</header>
+      <header className="App-header">Adaptive Learning Engine</header>
       {loading ? (
         <div className="loading-spinner-wrapper">
           <img
@@ -40,13 +64,15 @@ function App() {
         <div className="page-body">
           <div className="student-info-section">
             <div className="welcome-text">
-              Welcome back, {selectedStudent?.name}!
+              Welcome back, {selectedStudent.name}!
             </div>
             <StudentInfo student={selectedStudent} />
           </div>
           <div className="problem-list">
+            <div className="problem-list-header">Your Exercises</div>
             {problems.map((problem) => (
               <ProblemItem
+                onProblemSubmitted={onNewStudentRating}
                 key={problem.id}
                 student={selectedStudent}
                 problem={problem}

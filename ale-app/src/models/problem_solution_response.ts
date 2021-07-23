@@ -1,10 +1,17 @@
+import { Student } from "./student";
 import { EloResult } from "./elo_result";
 
 export class ProblemSolutionResponse {
   problemSuccess: boolean;
+  newStudentInfo: Student;
   eloChangeResult: EloResult;
-  constructor(success: boolean, eloResult: EloResult) {
+  constructor(
+    success: boolean,
+    newStudentInfo: Student,
+    eloChangeResult: EloResult
+  ) {
     this.problemSuccess = success;
-    this.eloChangeResult = eloResult;
+    this.newStudentInfo = newStudentInfo;
+    this.eloChangeResult = eloChangeResult;
   }
 }
