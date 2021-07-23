@@ -77,9 +77,11 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
         <div className="problem-title">{problem.subject}</div>
         <div className="problem-rating">
           (
-          {problem.activeRating >= 0
-            ? problem.activeRating
-            : problem.initialRating}
+          {Math.round(
+            problem.activeRating >= 0
+              ? problem.activeRating
+              : problem.initialRating
+          )}
           )
         </div>
       </div>

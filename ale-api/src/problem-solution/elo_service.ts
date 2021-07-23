@@ -81,7 +81,23 @@ const updateStudentElo = async (
   return studentData;
 };
 
-const udpateProblemElo = (
+const udpateProblemElo = async (
   problemId: string,
   eloDifferenceToApply: number,
-): void => {};
+): Promise<Problem> => {
+  const problemData: Student | any = await dbRef
+    .collection('problems')
+    .doc(problemId)
+    .get()
+    .then((snapshot) => snapshot.data());
+  problemData.id = problemId;
+  const curElo =
+    problemData.activeRating >= 0
+      ? problemData.activeRating
+      : problemData.initialRating;
+  const newElo = curElo + eloDifferenceToApply;
+  problemData.activeRating = newElo;
+
+  dbRef.collection('problems').doc(problemId).set(problemData);
+  return problemData;
+};
