@@ -30,6 +30,7 @@
   }
   .student-selection {
     flex-grow: 0;
+    margin-top: 0.3vh;
   }
 }
 .student-info-section {
@@ -37,7 +38,7 @@
   flex-direction: column;
   margin-bottom: 66px;
   .welcome-text {
-    padding: 16px;
+    padding: 16px 0 64px 0;
     font-weight: bold;
     font-size: 2em;
     text-align: center;
@@ -45,7 +46,7 @@
   }
 }
 .page-body {
-  padding: 66px;
+  padding: 24px 66px 0 66px;
   .problem-list {
     display: flex;
     flex-direction: column;

@@ -14,12 +14,14 @@ export const isCorrectAnswer = (
 export const getEloChangeResult = (
   submittedSolution: ProblemSolutionDTO,
 ): EloResult => {
-  const problemRating = submittedSolution.problem.activeRating
-    ? submittedSolution.problem.activeRating
-    : submittedSolution.problem.initialRating;
-  const studentRating = submittedSolution.student.activeRating
-    ? submittedSolution.student.activeRating
-    : submittedSolution.student.initialRating;
+  const problemRating =
+    submittedSolution.problem.activeRating > 0
+      ? submittedSolution.problem.activeRating
+      : submittedSolution.problem.initialRating;
+  const studentRating =
+    submittedSolution.student.activeRating > 0
+      ? submittedSolution.student.activeRating
+      : submittedSolution.student.initialRating;
 
   const expectedResultOfStudent =
     1 / (1 + 10 ** ((problemRating - studentRating) / 400));
