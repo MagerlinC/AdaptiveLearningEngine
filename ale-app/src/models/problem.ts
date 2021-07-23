@@ -1,5 +1,5 @@
-import { Category } from './category';
-import { RatedObject } from './rated_object';
+import { Category } from "./category";
+import { RatedObject } from "./rated_object";
 
 export class Problem implements RatedObject {
   id: string;
@@ -8,7 +8,7 @@ export class Problem implements RatedObject {
   subject: string;
   categories: Category[];
   type: string;
-  problemtext: string;
+  problemText: string;
   problemAnswer: string;
 
   constructor(
@@ -19,7 +19,7 @@ export class Problem implements RatedObject {
     categories: Category[],
     type: string,
     problemtext: string,
-    problemAnswer: string,
+    problemAnswer: string
   ) {
     this.id = id;
     this.initialRating = initialRating;
@@ -27,7 +27,7 @@ export class Problem implements RatedObject {
     this.subject = subject;
     this.categories = categories;
     this.type = type;
-    this.problemtext = problemtext;
+    this.problemText = problemtext;
     this.problemAnswer = problemAnswer;
   }
 }

@@ -9,14 +9,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppService = void 0;
 const common_1 = require("@nestjs/common");
 const elo_service_1 = require("./elo_service");
-const category_1 = require("./models/category");
-const problem_1 = require("./models/problem");
+const firebase_1 = require("./firebase");
 const problem_solution_response_1 = require("./models/problem_solution_response");
 let AppService = class AppService {
-    getProblems() {
-        const p1 = new problem_1.Problem('0', 900, null, 'English', [new category_1.Category('0', 'grammar')], 'input', 'Input the correct tense of the verb in the following sentence: "The developer did fix/fixed the bug"', 'fix');
-        const p2 = new problem_1.Problem('1', 1200, null, 'English', [new category_1.Category('0', 'grammar')], 'input', 'Input the correct tense of the verb in the following sentence: "I wish I was/were rich and famous!"', 'were');
-        return [p1, p2];
+    async getProblems() {
+        const problems = await firebase_1.dbRef
+            .collection('problems')
+            .get()
+            .then((snapshot) => {
+            const problems = [];
+            snapshot.forEach((doc) => {
+                problems.push(doc.data());
+            });
+            return problems;
+        });
+        return problems;
     }
     postProblemSolution(problemSolution) {
         const eloResult = elo_service_1.getEloChangeResult(problemSolution);

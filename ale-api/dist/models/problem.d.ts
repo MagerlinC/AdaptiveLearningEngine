@@ -7,7 +7,7 @@ export declare class Problem implements RatedObject {
     subject: string;
     categories: Category[];
     type: string;
-    problemtext: string;
+    problemText: string;
     problemAnswer: string;
     constructor(id: string, initialRating: number, activeRating: number, subject: string, categories: Category[], type: string, problemtext: string, problemAnswer: string);
 }

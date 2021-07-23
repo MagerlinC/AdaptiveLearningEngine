@@ -9,7 +9,7 @@ class Problem {
         this.subject = subject;
         this.categories = categories;
         this.type = type;
-        this.problemtext = problemtext;
+        this.problemText = problemtext;
         this.problemAnswer = problemAnswer;
     }
 }

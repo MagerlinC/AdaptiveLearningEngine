@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 import { Problem } from "../../models/problem";
 import { ProblemSolutionResponse } from "../../models/problem_solution_response";
 import { Student } from "../../models/student";
-import { postSolution } from "../../problem-service";
+import { postSolution } from "../../services/problem-service";
 import "./problem_item.scss";
 import CheckMarkIcon from "../../assets/checkmark.svg";
 import FailureIcon from "../../assets/close.svg";
@@ -26,7 +26,6 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
     const onResultFunc = (res: ProblemSolutionResponse) => {
       setRatingChange(res.eloChangeResult.playerAChange);
       setProblemCompletionStatus(res.problemSuccess);
-      console.log(res);
       setHasCompleted(true);
     };
     postSolution(problem, student, problemInput, onResultFunc);
@@ -69,11 +68,14 @@ export const ProblemItem: FunctionComponent<ProblemItemProps> = ({
       <div className="problem-header">
         <div className="problem-title"> Exercise {problem.id}</div>
         <div className="problem-rating">
-          ({problem.activeRating ? problem.activeRating : problem.initialRating}
+          (
+          {problem.activeRating >= 0
+            ? problem.activeRating
+            : problem.initialRating}
           )
         </div>
       </div>
-      <div className="problem-text">{problem.problemtext}</div>
+      <div className="problem-text">{problem.problemText}</div>
       {getProblemInteractionElement(problem)}
       <button className="submit-btn" onClick={submitAnswer}>
         Submit Answer

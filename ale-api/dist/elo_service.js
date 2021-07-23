@@ -13,7 +13,7 @@ const getEloChangeResult = (submittedSolution) => {
     const studentRating = submittedSolution.student.activeRating
         ? submittedSolution.student.activeRating
         : submittedSolution.student.initialRating;
-    const expectedResultOfStudent = 1 / (1 + 10) ** ((studentRating - problemRating) / 400);
+    const expectedResultOfStudent = 1 / (1 + 10 ** ((problemRating - studentRating) / 400));
     const kFactor = 20;
     const studentRight = exports.isCorrectAnswer(submittedSolution.problem, submittedSolution.selectedAnswer);
     let playerAChange;

@@ -31,7 +31,7 @@ __decorate([
     common_1.Get(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Array)
+    __metadata("design:returntype", Promise)
 ], AppController.prototype, "getProblems", null);
 __decorate([
     common_1.Post(),

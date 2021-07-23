@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Student } from "../../models/student";
 import "./student_info.scss";
 import ProfileIcon from "../../assets/man.svg";

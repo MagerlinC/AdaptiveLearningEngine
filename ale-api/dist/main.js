@@ -164,9 +164,9 @@ module.exports = function (updatedModules, renewedModules) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(4);
-const app_module_1 = __webpack_require__(5);
+const base_module_1 = __webpack_require__(5);
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(base_module_1.BaseModule);
     app.enableCors();
     await app.listen(3000);
     if (true) {
@@ -197,20 +197,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppModule = void 0;
+exports.BaseModule = void 0;
 const common_1 = __webpack_require__(6);
-const app_controller_1 = __webpack_require__(7);
-const app_service_1 = __webpack_require__(8);
-let AppModule = class AppModule {
+const problem_controller_1 = __webpack_require__(7);
+const problem_service_1 = __webpack_require__(8);
+const student_controller_1 = __webpack_require__(16);
+const student_service_1 = __webpack_require__(17);
+let BaseModule = class BaseModule {
 };
-AppModule = __decorate([
+BaseModule = __decorate([
     common_1.Module({
         imports: [],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        controllers: [problem_controller_1.ProblemController, student_controller_1.StudentController],
+        providers: [problem_service_1.ProblemService, student_service_1.StudentService],
     })
-], AppModule);
-exports.AppModule = AppModule;
+], BaseModule);
+exports.BaseModule = BaseModule;
 
 
 /***/ }),
@@ -238,13 +240,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppController = void 0;
+exports.ProblemController = void 0;
 const common_1 = __webpack_require__(6);
-const app_service_1 = __webpack_require__(8);
-const problem_solutionDTO_1 = __webpack_require__(14);
-let AppController = class AppController {
+const problem_service_1 = __webpack_require__(8);
+const problem_solutionDTO_1 = __webpack_require__(15);
+let ProblemController = class ProblemController {
     constructor(appService) {
         this.appService = appService;
     }
@@ -259,20 +261,20 @@ __decorate([
     common_1.Get(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Array)
-], AppController.prototype, "getProblems", null);
+    __metadata("design:returntype", typeof (_a = typeof Promise !== "undefined" && Promise) === "function" ? _a : Object)
+], ProblemController.prototype, "getProblems", null);
 __decorate([
     common_1.Post(),
     __param(0, common_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_a = typeof problem_solutionDTO_1.ProblemSolutionDTO !== "undefined" && problem_solutionDTO_1.ProblemSolutionDTO) === "function" ? _a : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof problem_solutionDTO_1.ProblemSolutionDTO !== "undefined" && problem_solutionDTO_1.ProblemSolutionDTO) === "function" ? _b : Object]),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "postProblemSolution", null);
-AppController = __decorate([
-    common_1.Controller(),
-    __metadata("design:paramtypes", [typeof (_b = typeof app_service_1.AppService !== "undefined" && app_service_1.AppService) === "function" ? _b : Object])
-], AppController);
-exports.AppController = AppController;
+], ProblemController.prototype, "postProblemSolution", null);
+ProblemController = __decorate([
+    common_1.Controller('problems'),
+    __metadata("design:paramtypes", [typeof (_c = typeof problem_service_1.ProblemService !== "undefined" && problem_service_1.ProblemService) === "function" ? _c : Object])
+], ProblemController);
+exports.ProblemController = ProblemController;
 
 
 /***/ }),
@@ -288,17 +290,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppService = void 0;
+exports.ProblemService = void 0;
 const common_1 = __webpack_require__(6);
 const elo_service_1 = __webpack_require__(9);
-const category_1 = __webpack_require__(11);
-const problem_1 = __webpack_require__(12);
-const problem_solution_response_1 = __webpack_require__(13);
-let AppService = class AppService {
-    getProblems() {
-        const p1 = new problem_1.Problem('0', 800, null, 'English', [new category_1.Category('0', 'grammar')], 'input', 'Input the correct tense of the verb in the following sentence: "The developer did fix/fixed the bug"', 'fix');
-        const p2 = new problem_1.Problem('1', 1200, null, 'English', [new category_1.Category('0', 'grammar')], 'input', 'Input the correct tense of the verb in the following sentence: "I wish I was/were rich and famous!"', 'were');
-        return [p1, p2];
+const firebase_1 = __webpack_require__(11);
+const problem_solution_response_1 = __webpack_require__(14);
+let ProblemService = class ProblemService {
+    async getProblems() {
+        const problems = await firebase_1.dbRef
+            .collection('problems')
+            .get()
+            .then((snapshot) => {
+            const problems = [];
+            snapshot.forEach((doc) => {
+                problems.push(doc.data());
+            });
+            return problems;
+        });
+        return problems;
     }
     postProblemSolution(problemSolution) {
         const eloResult = elo_service_1.getEloChangeResult(problemSolution);
@@ -307,10 +316,10 @@ let AppService = class AppService {
         return new problem_solution_response_1.ProblemSolutionResponse(problemSuccess, eloResult);
     }
 };
-AppService = __decorate([
+ProblemService = __decorate([
     common_1.Injectable()
-], AppService);
-exports.AppService = AppService;
+], ProblemService);
+exports.ProblemService = ProblemService;
 
 
 /***/ }),
@@ -372,46 +381,42 @@ exports.EloResult = EloResult;
 
 /***/ }),
 /* 11 */
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Category = void 0;
-class Category {
-    constructor(id, text) {
-        this.id = id;
-        this.text = text;
-    }
-}
-exports.Category = Category;
+exports.dbRef = void 0;
+const firebase_1 = __webpack_require__(12);
+__webpack_require__(13);
+const firebaseConfig = {
+    apiKey: 'AIzaSyAQgVo8ymurkua0weoyoax1kSCM-QiyMcU',
+    authDomain: 'adaptive-learning-engine.firebaseapp.com',
+    projectId: 'adaptive-learning-engine',
+    storageBucket: 'adaptive-learning-engine.appspot.com',
+    messagingSenderId: '457503847028',
+    appId: '1:457503847028:web:ff2f68c5c69788114dd721',
+};
+firebase_1.default.initializeApp(firebaseConfig);
+exports.dbRef = firebase_1.default.firestore();
 
 
 /***/ }),
 /* 12 */
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((module) => {
 
 "use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Problem = void 0;
-class Problem {
-    constructor(id, initialRating, activeRating, subject, categories, type, problemtext, problemAnswer) {
-        this.id = id;
-        this.initialRating = initialRating;
-        this.activeRating = activeRating;
-        this.subject = subject;
-        this.categories = categories;
-        this.type = type;
-        this.problemtext = problemtext;
-        this.problemAnswer = problemAnswer;
-    }
-}
-exports.Problem = Problem;
-
+module.exports = require("firebase");
 
 /***/ }),
 /* 13 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("firebase/firestore");
+
+/***/ }),
+/* 14 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -428,7 +433,7 @@ exports.ProblemSolutionResponse = ProblemSolutionResponse;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -443,6 +448,96 @@ class ProblemSolutionDTO {
     }
 }
 exports.ProblemSolutionDTO = ProblemSolutionDTO;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StudentController = void 0;
+const common_1 = __webpack_require__(6);
+const problem_solutionDTO_1 = __webpack_require__(15);
+const student_service_1 = __webpack_require__(17);
+let StudentController = class StudentController {
+    constructor(studentService) {
+        this.studentService = studentService;
+    }
+    getProblems() {
+        return this.studentService.getStudents();
+    }
+    postProblemSolution(solution) { }
+};
+__decorate([
+    common_1.Get(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_a = typeof Promise !== "undefined" && Promise) === "function" ? _a : Object)
+], StudentController.prototype, "getProblems", null);
+__decorate([
+    common_1.Post(),
+    __param(0, common_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof problem_solutionDTO_1.ProblemSolutionDTO !== "undefined" && problem_solutionDTO_1.ProblemSolutionDTO) === "function" ? _b : Object]),
+    __metadata("design:returntype", void 0)
+], StudentController.prototype, "postProblemSolution", null);
+StudentController = __decorate([
+    common_1.Controller('students'),
+    __metadata("design:paramtypes", [typeof (_c = typeof student_service_1.StudentService !== "undefined" && student_service_1.StudentService) === "function" ? _c : Object])
+], StudentController);
+exports.StudentController = StudentController;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StudentService = void 0;
+const common_1 = __webpack_require__(6);
+const firebase_1 = __webpack_require__(11);
+let StudentService = class StudentService {
+    async getStudents() {
+        const students = await firebase_1.dbRef
+            .collection('students')
+            .get()
+            .then((snapshot) => {
+            const students = [];
+            snapshot.forEach((doc) => {
+                students.push(doc.data());
+            });
+            return students;
+        });
+        return students;
+    }
+};
+StudentService = __decorate([
+    common_1.Injectable()
+], StudentService);
+exports.StudentService = StudentService;
 
 
 /***/ })
@@ -507,7 +602,7 @@ exports.ProblemSolutionDTO = ProblemSolutionDTO;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("0443e1a0d1085fa357df")
+/******/ 		__webpack_require__.h = () => ("0aba55b95882aebeb085")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
