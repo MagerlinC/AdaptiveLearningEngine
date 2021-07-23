@@ -51,6 +51,7 @@
 
 # ignore node/grunt dependency directories
 node_modules/
+dist/
 
 # ignore composer vendor directory
 /vendor
