@@ -7,6 +7,7 @@ import { Student } from "./models/student";
 import { getProblems } from "./services/problem-service";
 import { getStudents } from "./services/student-service";
 import LoadingIcon from "./assets/spinner.svg";
+import Dropdown from "./components/dropdown/dropdown";
 
 function App() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -51,7 +52,23 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">Adaptive Learning Engine</header>
+      <header className="App-header">
+        <div className="header-text">Adaptive Learning Engine</div>
+        <div className="student-selection">
+          {students.length > 0 && (
+            <Dropdown
+              dropdownItemDisplayFunction={(dropdownItem) =>
+                dropdownItem ? dropdownItem.name : ""
+              }
+              closedText="Select student"
+              locked={false}
+              dropdownItems={students}
+              selectedItem={selectedStudent}
+              onSelect={(newStudent) => setSelectedStudent(newStudent)}
+            />
+          )}
+        </div>
+      </header>
       {loading ? (
         <div className="loading-spinner-wrapper">
           <img
